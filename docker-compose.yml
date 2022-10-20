@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  ananas:
+    container_name: ananas
+    build:
+      context: ./ananas/
+      dockerfile: ./build/Dockerfile-dev
+    networks:
+      - proxy
+      - ananas-data
+    volumes:
+      - ./ananas/:/ms/:rw
+    expose:
+      - "9000"
+    entrypoint: "php-fpm"
+    depends_on:
+      - ananas-data-store
+
+  ananas-data-store:
+    container_name: ananas-data-store
+    build:
+      context: ./ananas
+      dockerfile: ./build/Dockerfile-dev-db
+    networks:
+      - ananas-data
+    volumes:
+      - ananas-data:/var/lib/mysql
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: jzgo04ws
+      MYSQL_DATABASE: ananas
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: precle3
+
+  pomidor:
+    container_name: pomidor
+    build:
+      context: ./pomidor/
+      dockerfile: ./build/Dockerfile-dev
+    networks:
+      - proxy
+      - pomidor-data
+    volumes:
+      - ./pomidor:/ms/:rw
+    expose:
+      - "9000"
+    entrypoint: "php-fpm"
+    depends_on:
+      - pomidor-data-store
+
+  pomidor-data-store:
+    container_name: pomidor-data-store
+    build:
+      context: ./pomidor
+      dockerfile: ./build/Dockerfile-dev-db
+    networks:
+      - pomidor-data
+    volumes:
+      - pomidor-data:/var/lib/mysql
+    expose:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: jzgo04ws
+      MYSQL_DATABASE: pomidor
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: precle3
+
+  proxy-server:
+    container_name: proxy-server
+    build:
+      context: ./proxy/
+      dockerfile: ./build/Dockerfile-dev
+    ports:
+      - "8080:80"
+    networks:
+      - proxy
+    depends_on:
+      - ananas
+      - pomidor
+
+networks:
+  proxy:
+  ananas-data:
+  pomidor-data:
+
+volumes:
+  ananas-data:
+  pomidor-data:
