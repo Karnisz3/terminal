@@ -21,9 +21,7 @@ services:
 
   ananas-data-store:
     container_name: ananas-data-store
-    build:
-      context: ./ananas
-      dockerfile: ./build/Dockerfile-dev-db
+    image: mysql:8
     networks:
       - ananas-data
     volumes:
@@ -56,9 +54,7 @@ services:
 
   pomidor-data-store:
     container_name: pomidor-data-store
-    build:
-      context: ./pomidor
-      dockerfile: ./build/Dockerfile-dev-db
+    image: mysql:8
     networks:
       - pomidor-data
     volumes:
