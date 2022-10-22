@@ -1,6 +1,7 @@
 version: "3"
 
 services:
+#ANANAS MICROSERVICE >>>
   ananas:
     container_name: ananas
     build:
@@ -8,6 +9,7 @@ services:
       dockerfile: ./build/Dockerfile-dev
     networks:
       - proxy
+      - broker
       - ananas-data
     volumes:
       - ./ananas/:/ms/:rw
@@ -33,7 +35,8 @@ services:
       MYSQL_DATABASE: ananas
       MYSQL_USER: dev
       MYSQL_PASSWORD: precle3
-
+#ANANAS MICROSERVICE <<<
+#POMIDOR MICROSERVICE >>>
   pomidor:
     container_name: pomidor
     build:
@@ -41,6 +44,7 @@ services:
       dockerfile: ./build/Dockerfile-dev
     networks:
       - proxy
+      - broker
       - pomidor-data
     volumes:
       - ./pomidor:/ms/:rw
@@ -66,7 +70,8 @@ services:
       MYSQL_DATABASE: pomidor
       MYSQL_USER: dev
       MYSQL_PASSWORD: precle3
-
+#ANANAS MICROSERVICE <<<
+#PROXY SERVER >>>
   proxy-server:
     container_name: proxy-server
     build:
@@ -79,9 +84,38 @@ services:
     depends_on:
       - ananas
       - pomidor
+#PROXY SERVER <<<
+#KAFKA MESSAGE BROKER >>>
+  zookeeper:
+    container_name: zookeeper
+    image: bitnami/zookeeper:latest
+    expose:
+      - "2128"
+    networks:
+      - broker
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: yes
+
+  broker:
+    container_name: kafka-broker
+    image: bitnami/kafka:latest
+    expose:
+      - "9092"
+    networks:
+      - broker
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: yes
+    depends_on:
+      - zookeeper
+#KAFKA MESSAGE BROKER <<<
 
 networks:
   proxy:
+  broker:
   ananas-data:
   pomidor-data:
 
